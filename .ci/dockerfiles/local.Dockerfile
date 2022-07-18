@@ -1,4 +1,4 @@
-FROM registry.gitlab.com/app-oneragtime/deepdive/ml-engine/ml_engine:latest
+FROM 
 
 WORKDIR .
 
