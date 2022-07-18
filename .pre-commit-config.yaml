@@ -1,0 +1,58 @@
+## In order to use this hook, remember to install pre-commit:
+## < brew install pre-commit >
+## And then you have to install this hooks:
+## < pre-commit install >
+## You can check the documentation here: https://pre-commit.com/
+
+fail_fast: true
+repos:
+  - repo: local
+    hooks:
+      - id: lint
+        name: Lint code
+        description: Using Black formatter
+        entry: black
+        args: [
+          --check,
+          .,
+          --exclude=/migrations/*,
+          --extend-exclude=/env/*
+        ]
+        files: .*py
+        exclude: /migrations/*
+        require_serial: true
+        additional_dependencies: ['black==21.11b1', 'click==8.0.4']
+        always_run: false
+        language: python
+        language_version: python3
+
+      - id: imports
+        name: Sort imports
+        description: Using Isort to sort imports
+        entry: isort
+        args: [
+          --check,
+          --trailing-comma,
+          --use-parentheses,
+          --force-single-line-imports,
+          --line-length=88,
+          --multi-line=3,
+          --force-grid-wrap=0,
+          --lines-after-imports=2,
+          --skip-glob=**/migrations/*,
+          --extend-skip-glob=**/env/*
+        ]
+        files: .*py
+        exclude: /migrations/*
+        require_serial: true
+        additional_dependencies: ['isort==5.10.1']
+        always_run: false
+        language: python
+        language_version: python3
+        verbose: true
+
+  -   repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.2.0
+      hooks:
+      -   id: trailing-whitespace
+      -   id: end-of-file-fixer

@@ -1,0 +1,40 @@
+COVERAGE = 0
+DOCKER_LOCAL = -f docker-compose.local.yml
+DOCKER_CONTAINER = deepdive_mlengine
+COMMAND_IN_DOCKER = docker exec -it ${DOCKER_CONTAINER} bash -c
+ISORT_FILES_IGNORED = --skip-glob=**/migrations/* --extend-skip-glob=**/env/*
+ISORT_FORMAT = --lines-after-imports=2 --force-grid-wrap=0 --multi-line=3
+ISORT_SYNTAX = --line-length=88 --force-single-line-imports --use-parentheses --trailing-comma
+ISORT_SETTINGS = ${ISORT_FILES_IGNORED} ${ISORT_FORMAT} ${ISORT_SYNTAX}
+BLACK_SETTINGS = . --exclude=/migrations/* --extend-exclude=/env/*
+
+
+bash:
+	docker exec -it ${DOCKER_CONTAINER} sh
+
+test-all:
+	docker exec -it ${DOCKER_CONTAINER} bash -c "pytest ${APP} -svv "
+
+local:
+	# start develop environment
+	docker-compose $(DOCKER_LOCAL) up ${ARGS}
+
+local-build:
+	# build docker images of the develop environment
+	# add environment COMPOSE_DOCKER_CLI_BUILD and DOCKER_BUILDKIT to use the new docker build image engine
+	COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose $(DOCKER_LOCAL) build ${ARGS}
+
+lint:
+	${COMMAND_IN_DOCKER} "black ${BLACK_SETTINGS}"
+
+check-lint:
+	${COMMAND_IN_DOCKER} "black --check ${BLACK_SETTINGS}"
+
+sort-imports:
+	${COMMAND_IN_DOCKER} "isort . ${ISORT_SETTINGS}"
+
+check-sorting:
+	${COMMAND_IN_DOCKER} "isort . ${ISORT_SETTINGS} --check"
+
+pre-commit:
+	brew install pre-commit && pre-commit install
